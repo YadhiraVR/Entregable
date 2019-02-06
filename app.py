@@ -61,6 +61,25 @@ def score_create():
     generated_id = str(s.id)
     return HTTPResponse(body = generated_id)
 
+@app.route('/score/edit', method="POST")
+def score_update():
+    # db
+    engine = create_engine('sqlite:///game.db')
+    session_db = sessionmaker()
+    session_db.configure(bind=engine)
+    session = session_db()
+    # form data
+    id = request.forms.get('id')
+    name = request.forms.get('name')
+    score = request.forms.get('score')
+    # save
+    session.query(Score).filter_by(id = id).update({
+        'name': name,
+        'score': score,
+    })
+    session.commit()
+    return HTTPResponse(body = 'score actualizado')
+
 # Main
 
 if __name__ == '__main__':

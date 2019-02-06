@@ -7,16 +7,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import select
 from sqlalchemy import Table, Column, Integer, String, Float
-from bottle import Bottle, run, HTTPResponse, static_file, redirect, error, template
-
-# Conexión a base de datos
- 
-Base = declarative_base()
-engine = create_engine('sqlite:///game.db')
-session_db = sessionmaker()
-session_db.configure(bind=engine)
+from bottle import Bottle, run, HTTPResponse, static_file, redirect, error, template, request
 
 # Modelos
+
+Base = declarative_base()
 
 class Score(Base):
     __tablename__ = 'scores'
@@ -34,15 +29,37 @@ def index():
 
 @app.route('/score/list', method="GET")
 def score_list():
+    # db
+    engine = create_engine('sqlite:///game.db')
+    session_db = sessionmaker()
+    session_db.configure(bind=engine)
+    session = session_db()
     conn = engine.connect()
+    # list
     stmt = select([Score])
     rs = conn.execute(stmt)
     rpta = [dict(r) for r in conn.execute(stmt)]
     return HTTPResponse(body = json.dumps(rpta))
 
-@app.route('/score/list')
+@app.route('/score/add', method="POST")
 def score_create():
-    pass
+    # db
+    engine = create_engine('sqlite:///game.db')
+    session_db = sessionmaker()
+    session_db.configure(bind=engine)
+    session = session_db()
+    # form data
+    name = request.forms.get('name')
+    score = request.forms.get('score')
+    # save
+    s = Score(
+        name=name,
+        score=score,
+    )
+    session.add(s)
+    session.commit()
+    generated_id = str(s.id)
+    return HTTPResponse(body = generated_id)
 
 # Main
 

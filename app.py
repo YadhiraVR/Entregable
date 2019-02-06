@@ -5,6 +5,7 @@ import json
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import select
 from sqlalchemy import Table, Column, Integer, String, Float
 from bottle import Bottle, run, HTTPResponse, static_file, redirect, error, template
 
@@ -30,6 +31,18 @@ app = bottle.app()
 @app.route('/')
 def index():
     return 'hola desde el servidor'
+
+@app.route('/score/list', method="GET")
+def score_list():
+    conn = engine.connect()
+    stmt = select([Score])
+    rs = conn.execute(stmt)
+    rpta = [dict(r) for r in conn.execute(stmt)]
+    return HTTPResponse(body = json.dumps(rpta))
+
+@app.route('/score/list')
+def score_create():
+    pass
 
 # Main
 

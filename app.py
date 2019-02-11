@@ -80,6 +80,21 @@ def score_update():
     session.commit()
     return HTTPResponse(body = 'score actualizado')
 
+
+@app.route('/score/delete', method="POST")
+def score_delete():
+    # db
+    engine = create_engine('sqlite:///game.db')
+    session_db = sessionmaker()
+    session_db.configure(bind=engine)
+    session = session_db()
+    # form data
+    id = request.forms.get('id')
+    # save
+    session.query(Score).filter_by(id = id).delete()
+    session.commit()
+    return HTTPResponse(body = 'score Eliminado')
+
 # Main
 
 if __name__ == '__main__':
